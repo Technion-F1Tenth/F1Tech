@@ -1,0 +1,14 @@
+digraph G {
+"base_link" -> "laser"[label="Broadcaster: /base_link_to_laser\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1677677509.916 sec old)\nBuffer length: 0.000 sec\n"];
+"base_link" -> "base_footprint"[label="Broadcaster: /base_link_to_base_footprint\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1677677509.916 sec old)\nBuffer length: 0.000 sec\n"];
+"base_link" -> "base_imu_link"[label="Broadcaster: /base_link_to_imu\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1677677509.916 sec old)\nBuffer length: 0.000 sec\n"];
+"map" -> "odom"[label="Broadcaster: /slam_toolbox\nAverage rate: 50.203 Hz\nMost recent transform: 1677677510.100 ( -0.184 sec old)\nBuffer length: 4.920 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1677677509.916"[ shape=plaintext ] ;
+ }->"base_link";
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1677677509.916"[ shape=plaintext ] ;
+ }->"map";
+}
