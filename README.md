@@ -1,5 +1,5 @@
 <h1 align="center">
-  The Technion F1Tenth Team
+  :racing_car: The Technion F1Tenth Team :racing_car:
 </h1>
 <p align="center">
   <img src="https://github.com/Yomaster10/F1Tech/blob/main/graphics/Technion%20F1Tenth%20Team.jpeg" width="500" height="500">
