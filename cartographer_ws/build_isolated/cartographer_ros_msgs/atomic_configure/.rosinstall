@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ccri-car-2/cartographer_ws/devel_isolated/cartographer_ros_msgs/setup.sh

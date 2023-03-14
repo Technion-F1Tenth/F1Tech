@@ -1,0 +1,2 @@
+cartographer:cartographer_ros/cartographer_ros:cartographer_ros/cartographer_ros_msgs:cartographer_ros/cartographer_rviz:f110_description:racecar_description
+-G Ninja -DCATKIN_DEVEL_PREFIX=/home/ccri-car-2/cartographer_ws/devel_isolated -DCMAKE_INSTALL_PREFIX=/home/ccri-car-2/cartographer_ws/install_isolated

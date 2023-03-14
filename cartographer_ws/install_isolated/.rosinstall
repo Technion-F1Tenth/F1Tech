@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/ccri-car-2/cartographer_ws/install_isolated/setup.sh
