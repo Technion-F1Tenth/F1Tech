@@ -10,7 +10,7 @@ class ReactiveFollowGap():
         #relevant attributes for the algorithms:
         self.threshold = 5. #check this
         self.min_gap = 3
-        self.safety_radius = 0.5 #[m] #what is the car width?
+        self.safety_radius = 1.0 #[m] #what is the car width?
         self.min_distance = 1
         self.gap_check_distance = 1.
 
@@ -127,14 +127,25 @@ class ReactiveFollowGap():
             middle_index = int((start_i+end_i)/2)
             return middle_index
 
-    def get_velocity(self, steering_angle):
-        slow = True
-        if slow == True:
-            return 1.0
+    def get_velocity(self, steering_angle, slow=False, adaptive=True):
+        if slow:
+            return 0.8
+        if adaptive:
+            velocity = max(2.7 - abs(np.rad2deg(steering_angle))/50, 0.8) # Velocity varies smoothly with steering angle
+            print('Velocity: ' + str(velocity))
+            return velocity
+        if abs(steering_angle) < np.deg2rad(5):
+            velocity = 2.3
         if abs(steering_angle) < np.deg2rad(10):
-            velocity = 2.6 #2.5
-        elif abs(steering_angle) < np.deg2rad(20):
             velocity = 2.2
+        elif abs(steering_angle) < np.deg2rad(15):
+            velocity = 2.1
+        elif abs(steering_angle) < np.deg2rad(20):
+            velocity = 2.0
+        elif abs(steering_angle) < np.deg2rad(30):
+            velocity = 1.8
+        elif abs(steering_angle) < np.deg2rad(40):
+            velocity = 1.6
         else:
             velocity = 1.4
         return velocity

@@ -121,6 +121,11 @@ alias melodic='source /opt/ros/melodic/setup.bash' # re-source ROS
 alias f110='source ~/f1tenth_ws/devel/setup.bash' # re-source the F1Tenth workspace
 alias cart='source ~/cartographer_ws/devel_isolated/setup.bash' # source Cartographer
 
+## Commands for turning things on
+alias teleop='roslaunch racecar teleop.launch'
+alias pf='roslaunch particle_filter localize.launch'
+alias mapping='roslaunch cartographer_ros f110_2d.launch'
+
 ## Other custom commands
 source /opt/ros/melodic/setup.bash # source ROS
 source ~/f1tenth_ws/devel/setup.bash # source the F1Tenth workspace

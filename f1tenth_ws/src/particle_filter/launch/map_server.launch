@@ -1,4 +1,4 @@
 <launch>
-    <arg name="map" default="$(find particle_filter)/maps/attempt2.yaml"/>
+    <arg name="map" default="$(find particle_filter)/maps/Circular_Map.yaml"/>
     <node pkg="map_server" name="map_server" type="map_server" args="$(arg map)" />
 </launch>
