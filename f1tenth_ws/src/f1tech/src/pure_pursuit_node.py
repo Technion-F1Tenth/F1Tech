@@ -15,7 +15,7 @@ WHEELBASE_LEN = 0.325
 # lookahead parameters
 ANG_LOOKAHEAD_DIST = 3
 
-LOOKAHEAD_DISTANCE = 0.4# 1.20
+LOOKAHEAD_DISTANCE = 0.6# 1.20
 KP = 0.3
 
 class PurePursuit(object):
@@ -23,7 +23,7 @@ class PurePursuit(object):
     The class that handles pure pursuit.
     """
     def __init__(self):
-        self.trajectory_name = 'attempt5'
+        self.trajectory_name = 'straight_blanchin'
         self.plan = self.construct_path()
         
         drive_topic = '/vesc/ackermann_cmd_mux/input/navigation'
@@ -163,7 +163,7 @@ class PurePursuit(object):
         sa_deg = np.rad2deg(steering_angle)
         print("Steering Angle: {:.3f} [deg]".format(sa_deg))
         drive_msg.drive.speed = self.get_velocity(steering_angle)
-        #self.drive_pub.publish(drive_msg)
+        self.drive_pub.publish(drive_msg)
 
     def create_waypoint_marker(self, waypoint_idx, nearest_wp=False):
         """Given the index of the nearest waypoint, publishes the necessary Marker data to the 'wp_viz' topic for RViZ visualization"""

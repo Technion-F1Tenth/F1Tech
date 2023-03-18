@@ -131,7 +131,7 @@ class ReactiveFollowGap():
         if slow:
             return 0.8
         if adaptive:
-            velocity = max(2.7 - abs(np.rad2deg(steering_angle))/50, 0.8) # Velocity varies smoothly with steering angle
+            velocity = max(3.0 - abs(np.rad2deg(steering_angle))/50, 0.8) # Velocity varies smoothly with steering angle
             print('Velocity: ' + str(velocity))
             return velocity
         if abs(steering_angle) < np.deg2rad(5):
