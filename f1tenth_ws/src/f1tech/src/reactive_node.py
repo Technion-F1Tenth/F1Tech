@@ -5,12 +5,15 @@ import numpy as np
 from sensor_msgs.msg import LaserScan
 from ackermann_msgs.msg import AckermannDriveStamped, AckermannDrive
 
+MAX_SPEED = 3.2
+SLOW_MODE = True
+
 class ReactiveFollowGap():
     def __init__(self):
         #relevant attributes for the algorithms:
         self.threshold = 5. #check this
         self.min_gap = 3
-        self.safety_radius = 1.0 #[m] #what is the car width?
+        self.safety_radius = 0.8 #[m] #what is the car width?
         self.min_distance = 1
         self.gap_check_distance = 1.
 
@@ -127,11 +130,11 @@ class ReactiveFollowGap():
             middle_index = int((start_i+end_i)/2)
             return middle_index
 
-    def get_velocity(self, steering_angle, slow=False, adaptive=True):
-        if slow:
+    def get_velocity(self, steering_angle, adaptive=True):
+        if SLOW_MODE:
             return 0.8
         if adaptive:
-            velocity = max(3.0 - abs(np.rad2deg(steering_angle))/50, 0.8) # Velocity varies smoothly with steering angle
+            velocity = max(MAX_SPEED - abs(np.rad2deg(steering_angle))/50, 0.8) # Velocity varies smoothly with steering angle
             print('Velocity: ' + str(velocity))
             return velocity
         if abs(steering_angle) < np.deg2rad(5):

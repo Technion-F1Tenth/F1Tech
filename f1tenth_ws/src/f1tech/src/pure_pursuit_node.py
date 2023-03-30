@@ -15,15 +15,22 @@ WHEELBASE_LEN = 0.325
 # lookahead parameters
 ANG_LOOKAHEAD_DIST = 3
 
-LOOKAHEAD_DISTANCE = 0.6# 1.20
+LOOKAHEAD_DISTANCE = 1.6 # 1.20
 KP = 0.3
+
+MAX_SPEED = 2.7
+SLOW_MODE = False
+WAYPOINT_EDITING = False
+
+# Optimal speed: 2.7
+# Optimal Lookahead distance: 1.6
 
 class PurePursuit(object):
     """
     The class that handles pure pursuit.
     """
     def __init__(self):
-        self.trajectory_name = 'straight_blanchin'
+        self.trajectory_name = 'mp_assignment'
         self.plan = self.construct_path()
         
         drive_topic = '/vesc/ackermann_cmd_mux/input/navigation'
@@ -55,7 +62,7 @@ class PurePursuit(object):
             lookahead_waypoint_idx += 1
             if (lookahead_waypoint_idx > len(self.plan) - 1):
                 lookahead_waypoint_idx = 0
-        print(lookahead_waypoint_idx, nearest_waypoint_idx)
+        #print(lookahead_waypoint_idx, nearest_waypoint_idx)
         
         # Choose next waypoint to pursue (lookahead)
         plan_size = len(self.plan)
@@ -76,13 +83,13 @@ class PurePursuit(object):
         eucl_d = math.sqrt(math.pow(goal_x - curr_x, 2) + math.pow(goal_y - curr_y, 2))
 
         lookahead_angle = math.atan2(goal_y - curr_y, goal_x - curr_x)
-        print(lookahead_angle)
+        #print(lookahead_angle)
         del_y = eucl_d * math.sin(lookahead_angle - heading)
 
         #curvature = math.degrees(2.0*(abs(goal_x) - abs(curr_x))/(math.pow(eucl_d, 2)))
         #curvature = math.degrees(2.0*del_y/(math.pow(eucl_d, 2)))
         curvature = 2.0*del_y/(math.pow(eucl_d, 2))
-        print(curvature)
+        #print(curvature)
         #steering_angle = math.atan(curvature * WHEELBASE_LEN)
         steering_angle = KP * curvature
         while (steering_angle > np.pi/2) or (steering_angle < -np.pi/2):
@@ -90,7 +97,7 @@ class PurePursuit(object):
                 steering_angle -= np.pi
             elif steering_angle < -np.pi/2:
                 steering_angle += np.pi
-        print(steering_angle)
+        #print(steering_angle)
 
         """
         theta = math.atan2(ang_goal_y - curr_y, ang_goal_x - curr_x)
@@ -163,7 +170,8 @@ class PurePursuit(object):
         sa_deg = np.rad2deg(steering_angle)
         print("Steering Angle: {:.3f} [deg]".format(sa_deg))
         drive_msg.drive.speed = self.get_velocity(steering_angle)
-        self.drive_pub.publish(drive_msg)
+        if not WAYPOINT_EDITING:
+            self.drive_pub.publish(drive_msg)
 
     def create_waypoint_marker(self, waypoint_idx, nearest_wp=False):
         """Given the index of the nearest waypoint, publishes the necessary Marker data to the 'wp_viz' topic for RViZ visualization"""
@@ -210,11 +218,14 @@ class PurePursuit(object):
             id += 1
         return markerArray
 
-    def get_velocity(self, steering_angle):
+    def get_velocity(self, steering_angle, adaptive=True):
         """ Given the desired steering angle, returns the appropriate velocity to publish to the car """
-        slow = True
-        if slow == True:
+        if SLOW_MODE:
             return 0.8
+        if adaptive:
+            velocity = max(MAX_SPEED - abs(np.rad2deg(steering_angle))/50, 0.8) # Velocity varies smoothly with steering angle
+            print('Velocity: ' + str(velocity))
+            return velocity
         if abs(steering_angle) < np.deg2rad(10):
             velocity = 1.2 #2.6 #2.5
         elif abs(steering_angle) < np.deg2rad(20):
