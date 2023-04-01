@@ -19,6 +19,7 @@ DESIRED_DISTANCE_LEFT = 1
 VELOCITY = 2.00 # meters per second
 CAR_LENGTH = 0.50 # Traxxas Rally is 20 inches or 0.5 meters
 
+MAX_SPEED = 2.5
 class WallFollow:
     """ Implement Wall Following on the car
     """
@@ -28,20 +29,35 @@ class WallFollow:
         drive_topic = "/vesc/ackermann_cmd_mux/input/navigation"
 
         self.lidar_sub_ = rospy.Subscriber(lidarscan_topic, LaserScan, self.lidar_callback, queue_size=10)
-        self.drive_pub_ = rospy.Publisher(drive_topic, AckermannDriveStamped, queue_size=10)
+        self.drive_pub_ = rospy.Publisher(drive_topic, AckermannDriveStamped, queue_size=1)
 
+
+        #PID that works: kp=4, kd=0, ki=0
         #PID CONTROL PARAMS
-        self.kp = 1
-        self.kd = 0.2
-        self.ki = 0.5
+        self.kp = 2
+        self.kd = 0.0
+        self.ki = 1
         self.integral = 0
         self.prev_error = 0
         self.error = 0
 
         self.time_current = 0
         self.time_previous = 0
-        self.following_distance = 1.3#requested distance to wall
-        self.lookahead_param = 0.5 #how much our car is projected to move forward between servo commands
+        #was 1.3 m
+        self.following_distance = 0.5 #requested distance to wall
+        #was 0.5 m
+        self.lookahead_param = 0.3 #how much our car is projected to move forward between servo commands
+
+        self.max_turn = np.deg2rad(30)
+
+        # while not rospy.is_shutdown():
+        #     drive_msg = AckermannDriveStamped()
+        #     drive_msg.header.stamp = rospy.Time.now()
+        #     drive_msg.header.frame_id = "laser"
+        #     drive_msg.drive.steering_angle = self.max_turn
+        #     drive_msg.drive.speed = 0
+        #     self.drive_pub_.publish(drive_msg)
+
 
     def getRange(self, data, angle):
         # data: single message from topic /scan
@@ -63,21 +79,26 @@ class WallFollow:
 
         return None
 
+
     def pid_control(self, error, velocity):
         angle = -(self.kp*self.error + self.ki*self.integral + self.kd*(self.error-self.prev_error)/(self.time_current-self.time_previous))
        
-        if angle > np.deg2rad(45):
-            angle = np.deg2rad(45)
-        elif angle < -np.deg2rad(45):
-            angle = -np.deg2rad(45)
+        if angle > self.max_turn:
+            angle = self.max_turn
+        elif angle < -self.max_turn:
+            angle = -self.max_turn
         
-        print("angle = ", np.rad2deg(angle))
-        if abs(np.rad2deg(angle)) < 10:
-            velocity = 1.
-        elif (abs(np.rad2deg(angle)) > 10 and abs(np.rad2deg(angle)) < 30):
-            velocity = 1.
-        else:
-            velocity = 0.7
+        # print("angle = ", np.rad2deg(angle))
+        # if abs(np.rad2deg(angle)) < 3:
+        #     velocity = 2.5
+        # elif abs(np.rad2deg(angle)) < 10:
+        #     velocity = 2.
+        # elif (abs(np.rad2deg(angle)) > 10 and abs(np.rad2deg(angle)) < 30):
+        #     velocity = 1.5
+        # else:
+        #     velocity = 1
+
+        velocity = MAX_SPEED*(1- abs(angle)/self.max_turn)
         
         drive_msg = AckermannDriveStamped()
         drive_msg.header.stamp = rospy.Time.now()

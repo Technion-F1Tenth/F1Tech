@@ -14,6 +14,7 @@ class Safety(object):
     """
     def __init__(self):
         """
+        
         One publisher should publish to the /brake topic with a AckermannDriveStamped brake message.
         One publisher should publish to the /brake_bool topic with a Bool message.
         You should also subscribe to the /scan topic to get the LaserScan messages and
@@ -23,21 +24,15 @@ class Safety(object):
         """
         # self.speed = Odometry().twist.twist.linear
         self.speed = 0
-        self.TTC_thresh = 0.001 #0.3 #1 second TTC threshold
+        self.TTC_threshold = 0.25 #0.3 #1 second TTC threshold
 
         self.init_publishers()
         self.init_subscribers()
 
     def init_publishers(self):
-        # self._brake_publisher = rospy.Publisher("/vesc/ackermann_cmd_mux/input/navigation", AckermannDriveStamped, queue_size = 10)
-        # self._brake_publisher2 = rospy.Publisher("/nav", AckermannDriveStamped, queue_size = 10)
-        # self._brake_publisher3 = rospy.Publisher("/vesc/commands/motor/speed", Float64, queue_size = 10)
-        # self._brake_publisher4 = rospy.Publisher("/vesc/high_level/ackermann_cmd_mux/active", AckermannDriveStamped, queue_size = 10)
-        # self._brake_publisher2 = rospy.Publisher("/vesc/high_level/ackermann_cmd_mux/input/default", AckermannDriveStamped, queue_size = 10)
-        # self._brake_publisher6 = rospy.Publisher("/vesc/low_level/ackermann_cmd_mux/active", AckermannDriveStamped, queue_size = 10)
+
         self._brake_publisher = rospy.Publisher("/vesc/low_level/ackermann_cmd_mux/input/safety", AckermannDriveStamped, queue_size = 10)
-        # self._brake_publisher8 = rospy.Publisher("/vesc/low_level/ackermann_cmd_mux/input/navigation", AckermannDriveStamped, queue_size = 10)
-        #self._brake_bool_publisher = rospy.Publisher("/brake_bool", Bool, queue_size = 1)
+
 
     def init_subscribers(self):
         rospy.Subscriber("/scan", LaserScan, self.scan_callback, queue_size = 10)
@@ -56,7 +51,7 @@ class Safety(object):
 
     def scan_callback(self, scan_msg):
         
-        TTC_threshold = 1
+        # TTC_threshold = 1
         min_TTC = 50
         # vel_x = self.speed.x
         # vel_y = self.speed.y
@@ -89,7 +84,7 @@ class Safety(object):
                 if (local_derivative > 0) and (local_TTC < min_TTC):
                     min_TTC = local_TTC
             # print("min_TTC = ", min_TTC)
-            if min_TTC <= TTC_threshold:
+            if min_TTC <= self.TTC_threshold:
                 vel = AckermannDriveStamped()
                 vel.drive.speed = float(0)
                 # self.drive_pub_.publish(vel)
@@ -135,5 +130,5 @@ def main():
     rospy.spin()
 
 if __name__ == '__main__':
-    print("AEB-Mode Enabled")
+    print("AEB-Mode Enabled SHMERR")
     main()

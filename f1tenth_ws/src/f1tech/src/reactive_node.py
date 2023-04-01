@@ -5,15 +5,16 @@ import numpy as np
 from sensor_msgs.msg import LaserScan
 from ackermann_msgs.msg import AckermannDriveStamped, AckermannDrive
 
-MAX_SPEED = 3.2
-SLOW_MODE = True
+MAX_SPEED = 2.0
+
+SLOW_MODE = False
 
 class ReactiveFollowGap():
     def __init__(self):
         #relevant attributes for the algorithms:
         self.threshold = 5. #check this
-        self.min_gap = 3
-        self.safety_radius = 0.8 #[m] #what is the car width?
+        self.min_gap = 3 #change this tf?
+        self.safety_radius = 1. #1.5 #[m] #what is the car width?
         self.min_distance = 1
         self.gap_check_distance = 1.
 
@@ -25,9 +26,21 @@ class ReactiveFollowGap():
         # Topics & Subs, Pubs
         lidarscan_topic = '/scan'
         drive_topic = '/vesc/ackermann_cmd_mux/input/navigation'
+        safety_topic = '/vesc/low_level/ackermann_cmd_mux/input/safety'
 
         self.scan_sub_ = rospy.Subscriber(lidarscan_topic, LaserScan, self.lidar_callback, queue_size=10)
+        
+        self.safety_sub_ = rospy.Subscriber(safety_topic, AckermannDriveStamped, self.safety_callback, queue_size=10)
+
         self.drive_pub_ = rospy.Publisher(drive_topic, AckermannDriveStamped, queue_size=10)
+
+    def safety_callback(self, msg):
+        print("REACHED")
+        # vel = AckermannDriveStamped()
+        # vel.drive.speed = float(0)
+        self.drive_pub_.publish(msg)
+        rospy.signal_shutdown("Safety Stop")
+        
 
     def preprocess_lidar(self, ranges):
         """ Preprocess the LiDAR scan array. Expert implementation includes:
@@ -95,6 +108,16 @@ class ReactiveFollowGap():
         # print(f"max of max_gap = {max(max_range)}") 
         if length > self.min_gap:
             return max_range
+        else:
+            print("max gap too smalls")
+            drive_msg = AckermannDriveStamped()
+            drive_msg.drive.steering_angle = 0.
+            drive_msg.drive.speed = 0.
+            self.drive_pub_.publish(drive_msg)
+            # rospy.sleep(2)
+            # quit()
+            # exit()
+            rospy.signal_shutdown("max gap too small")
         return
     
     def find_best_point(self, start_i, end_i, ranges, method='furthest'):
@@ -135,7 +158,7 @@ class ReactiveFollowGap():
             return 0.8
         if adaptive:
             velocity = max(MAX_SPEED - abs(np.rad2deg(steering_angle))/50, 0.8) # Velocity varies smoothly with steering angle
-            print('Velocity: ' + str(velocity))
+            # print('Velocity: ' + str(velocity))
             return velocity
         if abs(steering_angle) < np.deg2rad(5):
             velocity = 2.3
@@ -203,8 +226,14 @@ class ReactiveFollowGap():
             # best_idx = self.find_best_point(*max_gap_indices, processed_ranges, method='middle')
             best_idx = self.find_best_point(max_gap_indices[0], max_gap_indices[-1], processed_ranges, method='middle')
             steering_angle = -self.angles[best_idx]
-        else:
-            print("Getting NONE for max_gap")
+        # else:
+        #     print("Getting NONE for max_gap")
+        #     drive_msg = AckermannDriveStamped()
+        #     drive_msg.drive.steering_angle = 0.
+        #     drive_msg.drive.speed = 0.
+        #     self.drive_pub_.publish(drive_msg)
+        #     rospy.sleep(2)
+        
         ## print("steering angle = ", -steering_angle) - uncomment to see the steering angle
         
         # print(f"max gap = {max_gap_indices}")
@@ -243,5 +272,6 @@ def main():
     rospy.spin()
 
 if __name__ == '__main__':
+    print('NEW UPDATE NEWNEW')
     print("Follow-The-Gap Mode Initialized...")
     main()
