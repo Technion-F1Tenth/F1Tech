@@ -1,8 +1,0 @@
-prefix=/home/ccri-car-2/f1tenth_ws/devel
-
-Name: f1tech
-Description: Description of f1tech
-Version: 1.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
